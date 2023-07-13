@@ -3,6 +3,7 @@ import pygame
 from src.utils import scale_image
 from src.Cars import PlayerCar
 from src.GameInfo import GameInfo
+from src.Sensor import Sensor
 
 pygame.font.init()
 
@@ -12,6 +13,7 @@ BACKGROUND = scale_image(pygame.image.load("imgs/green-grass-background.jpg"), 0
 
 TRACK = scale_image(pygame.image.load("imgs/track.png"), 0.9)
 TRACK_BORDER = scale_image(pygame.image.load("imgs/track-border.png"), 0.9)
+
 TRACK_BORDER_MASK = pygame.mask.from_surface(TRACK_BORDER)
 
 WIDTH, HEIGHT = TRACK.get_width(), TRACK.get_height()
@@ -22,7 +24,6 @@ pygame.display.set_caption("Car Driving")
 FPS = 60
 
 def draw(win, images, player_car, game_info):
-    #WIN.fill((255, 255, 255))
     for img, pos in images:
         win.blit(img, pos)
 
@@ -34,31 +35,33 @@ def draw(win, images, player_car, game_info):
 
     player_car.draw(win)
 
-    pygame.display.update()
+    #pygame.display.update()
 
 def move_player(player_car):
     keys = pygame.key.get_pressed()
     moved = False
+    turn_right = False
+    turn_left = False
 
     if keys[pygame.K_a] and player_car.vel !=0:
         player_car.rotate(left=True)
+        turn_left = True
     if keys[pygame.K_d] and player_car.vel !=0:
         player_car.rotate(right=True)
+        turn_right = True
     if keys[pygame.K_w]:
         moved = True
-        player_car.move_forward()
+        player_car.move_forward(turn_left, turn_right)
     if keys[pygame.K_s]:
         moved = True
-        player_car.move_backwards()
+        player_car.move_backwards(turn_left, turn_right)
     if keys[pygame.K_r]:
         player_car.reset()
         game_info.reset()
 
     if not moved:
-        player_car.reduce_speed()
+        player_car.reduce_speed(turn_left, turn_right)
 
-    # Apply drift - 90 degree angle to movement
-    # Decrease drift 'momentum' by drift friction each tick (after applying to movement?)
 
 def handle_collision(player_car):
     if player_car.collide(TRACK_BORDER_MASK) != None:
@@ -72,8 +75,10 @@ def handle_collision(player_car):
 run = True
 clock = pygame.time.Clock()
 images = [(BACKGROUND, (0,0)), (TRACK, (0,0))]
-player_car = PlayerCar(4, 4)
+
+player_car = PlayerCar(6, 5)
 game_info = GameInfo()
+beam_sensors = Sensor(WIN, TRACK_BORDER)
 
 bounce_flag = 0
 
@@ -83,7 +88,7 @@ while run:
 
     if bounce_flag > 0:
         bounce_flag -= 1
-        player_car.reduce_speed()
+        player_car.reduce_speed(False, False)
     else:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -91,7 +96,11 @@ while run:
                 break
 
         move_player(player_car)
+
+        distances = beam_sensors.beam_distances(player_car)
+
         bounce_flag = handle_collision(player_car)
 
+    pygame.display.update()
 
 pygame.quit()
