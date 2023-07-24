@@ -37,10 +37,16 @@ class AbstractCar:
             win, self.img, (self.x, self.y), self.angle)
 
     def move_forward(self, turn_left, turn_right):
+        """
+        Apply forward acceleration and move car
+        """
         self.vel = min(self.vel + self.acceleration, self.max_vel)
         self.move(turn_left, turn_right)
 
     def move_backwards(self, turn_left, turn_right):
+        """
+        Apply reverse acceleration and move car
+        """
         self.vel = max(self.vel - self.acceleration, -self.max_vel/2)
         self.move(turn_left, turn_right)
 
@@ -69,6 +75,10 @@ class AbstractCar:
         self.driftMomentum *= self.driftFriction
 
     def reduce_speed(self, turn_left, turn_right):
+        """
+        Apply friction if no acceleration is provided.
+        Half speed every tick.
+        """
         if self.vel < 0:
             self.vel = min(self.vel + self.acceleration/2, 0)
         else:
@@ -77,6 +87,9 @@ class AbstractCar:
         self.move(turn_left, turn_right)
 
     def collide(self, mask, x=0, y=0):
+        """
+        Detect if collision has occured between provided mask and the car object.
+        """
         # x, y parameters are pos of input mask
         car_mask = pygame.mask.from_surface(self.rot_img)
         offset = (int(self.rot_x-x), int(self.rot_y-y))
@@ -84,11 +97,58 @@ class AbstractCar:
         return poi
     
     def bounce(self):
+        """
+        Reverse the direction of car if person controlling crashes into barrier.
+        """
         self.vel = -self.vel/2
         self.driftMomentum = -self.driftMomentum
-        self.move(False, False)
 
         
 class PlayerCar(AbstractCar):
     IMG = scale_image(pygame.image.load("imgs/grey-car.png"), 0.55)
     START_POS = (175, 200)
+
+    def __init__(self, max_vel, rotation_vel):
+        super().__init__(max_vel, rotation_vel)
+        self.dead = False
+
+    def take_action(self, action_no):
+        """
+        Have the car move according to the associated action_no provided.
+        Reduce speed (due to friction) of car if no forward or reverse acceleration.
+        """
+        if action_no == 1:
+            # 1 - just left
+            if self.vel > 0:
+                self.rotate(left=True)
+            self.reduce_speed(True, False)
+        elif action_no == 2:
+            # 2 - just right
+            if self.vel > 0:
+                self.rotate(right=True)
+            self.reduce_speed(False, True)
+        elif action_no == 3:
+            # 3 - just forward
+            self.move_forward(False, False)
+        elif action_no == 4:
+            # 4 - just backward
+            self.move_backwards(False, False)
+        elif action_no == 5:
+            # 5 - forward left
+            self.rotate(left=True)
+            self.move_forward(True, False)
+        elif action_no == 6:
+            # 6 - forward right
+            self.rotate(right=True)
+            self.move_forward(False, True)
+        elif action_no == 7:
+            # 7 - backward left
+            self.rotate(left=True)
+            self.move_backwards(True, False)
+        elif action_no == 8:
+            # 8 - backward right
+            self.rotate(right=True)
+            self.move_backwards(False, True)
+        elif action_no == 9:
+            # 9 - do nothing
+            self.reduce_speed(False, False)

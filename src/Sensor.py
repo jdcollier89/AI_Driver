@@ -1,7 +1,7 @@
 import pygame
 import math
 
-DEBUG_SENSORS = False
+DEBUG_SENSORS = True
 
 class Sensor:
     def __init__(self, surface, track_border):
