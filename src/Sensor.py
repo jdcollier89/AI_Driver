@@ -1,5 +1,6 @@
 import pygame
 import math
+from src.utils import distance_between_points
 
 DEBUG_SENSORS = True
 
@@ -53,13 +54,13 @@ class Sensor:
         else:
             return None
     
-    def distance_between_points(self, collision_point, origin):
-        try:
-            x_dist = abs(collision_point[0]-origin[0])
-            y_dist = abs(collision_point[1]-origin[1])
-            return round(math.hypot(x_dist, y_dist), 1)
-        except:
-            return None
+    # def distance_between_points(self, collision_point, origin):
+    #     try:
+    #         x_dist = abs(collision_point[0]-origin[0])
+    #         y_dist = abs(collision_point[1]-origin[1])
+    #         return round(math.hypot(x_dist, y_dist), 1)
+    #     except:
+    #         return None
 
     def beam_distances(self, player_car):
         origin = (player_car.x, player_car.y)
@@ -75,10 +76,10 @@ class Sensor:
         ne_beam = self.draw_beam(-player_car.angle + 315, origin)
 
         distance_array = [
-            self.distance_between_points(n_beam, origin), self.distance_between_points(ne_beam, origin), 
-            self.distance_between_points(e_beam, origin), self.distance_between_points(se_beam, origin),
-            self.distance_between_points(s_beam, origin), self.distance_between_points(sw_beam, origin),
-            self.distance_between_points(w_beam, origin), self.distance_between_points(nw_beam, origin)
+            distance_between_points(n_beam, origin), distance_between_points(ne_beam, origin), 
+            distance_between_points(e_beam, origin), distance_between_points(se_beam, origin),
+            distance_between_points(s_beam, origin), distance_between_points(sw_beam, origin),
+            distance_between_points(w_beam, origin), distance_between_points(nw_beam, origin)
             ]
         
         return distance_array

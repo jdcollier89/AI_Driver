@@ -4,6 +4,7 @@ from src.utils import scale_image
 from src.Cars import PlayerCar
 from src.GameInfo import GameInfo
 from src.Sensor import Sensor
+from src.RewardGates import RewardGate
 
 pygame.font.init()
 
@@ -27,6 +28,7 @@ MANUAL_CONTROL = True
 player_car = PlayerCar(6, 5)
 game_info = GameInfo()
 beam_sensors = Sensor(WIN, TRACK_BORDER)
+reward_gates = RewardGate()
 
 FPS = 60
 
@@ -43,6 +45,11 @@ def draw(win, images, player_car, game_info):
 
     vel_text = MAIN_FONT.render(f"Vel: {round(player_car.vel, 1)}px/s", 1, (255, 255, 255))
     win.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 10))
+
+    vel_text = MAIN_FONT.render(f"Score: {game_info.score}", 1, (255, 255, 255))
+    win.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 70))
+
+    win.blit(reward_gates.return_active(), (0,0))
 
     player_car.draw(win)
 
@@ -71,6 +78,7 @@ def detect_input():
     if keys[pygame.K_r]:
         player_car.reset()
         game_info.reset()
+        reward_gates.reset()
 
     # Player Car Actions
     if (not(move_forward) and not(move_backward)) or (move_forward and move_backward):
@@ -109,6 +117,7 @@ def detect_input():
 
 def handle_collision(player_car):
     bounce_flag = 0
+
     if MANUAL_CONTROL:
         if player_car.collide(TRACK_BORDER_MASK) != None:
             player_car.bounce()
@@ -117,6 +126,12 @@ def handle_collision(player_car):
     else:
         if player_car.collide(TRACK_BORDER_MASK) != None:
             player_car.dead = True
+
+    # gate_mask = reward_gates.return_active_mask()
+    # if player_car.collide(gate_mask) != None:
+    #     game_info.score += 1
+    #     reward_gates.increment_gate()
+
     return bounce_flag
 
 run = True
@@ -150,6 +165,9 @@ while run:
 
     if bounce_flag == 0:
         bounce_flag = handle_collision(player_car)
+
+    reward_gates.passed_gate(player_car, game_info)
+    reward_gates.distance_to_gate(player_car.x, player_car.y)
 
     pygame.display.update()
 
