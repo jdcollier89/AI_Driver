@@ -53,14 +53,6 @@ class Sensor:
             return hit_pos
         else:
             return None
-    
-    # def distance_between_points(self, collision_point, origin):
-    #     try:
-    #         x_dist = abs(collision_point[0]-origin[0])
-    #         y_dist = abs(collision_point[1]-origin[1])
-    #         return round(math.hypot(x_dist, y_dist), 1)
-    #     except:
-    #         return None
 
     def beam_distances(self, player_car):
         origin = (player_car.x, player_car.y)

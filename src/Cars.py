@@ -111,6 +111,7 @@ class PlayerCar(AbstractCar):
     def __init__(self, max_vel, rotation_vel):
         super().__init__(max_vel, rotation_vel)
         self.dead = False
+        self.bounce_flag = 0
 
     def take_action(self, action_no):
         """

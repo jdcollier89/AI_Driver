@@ -22,6 +22,10 @@ def blit_rotate_center(win, image, center, angle):
     return rotated_image, new_rect.topleft
 
 def distance_between_points(point1, point2):
+    """
+    Given the coordinates of two points (given as a tuple),
+    return the distance between the two points.
+    """
     try:
         x_dist = abs(point1[0]-point2[0])
         y_dist = abs(point1[1]-point2[1])

@@ -127,11 +127,6 @@ def handle_collision(player_car):
         if player_car.collide(TRACK_BORDER_MASK) != None:
             player_car.dead = True
 
-    # gate_mask = reward_gates.return_active_mask()
-    # if player_car.collide(gate_mask) != None:
-    #     game_info.score += 1
-    #     reward_gates.increment_gate()
-
     return bounce_flag
 
 run = True
@@ -154,23 +149,23 @@ while run:
             run = False
             break
 
-    if bounce_flag > 0:
+    if player_car.bounce_flag > 0:
         # Overwrite player input to "Do Nothing"
-        bounce_flag -= 1
+        player_car.bounce_flag -= 1
         action_no = 9
 
     player_car.take_action(action_no)
 
     distances = beam_sensors.beam_distances(player_car)
 
-    if bounce_flag == 0:
-        bounce_flag = handle_collision(player_car)
+    if player_car.bounce_flag == 0:
+        player_car.bounce_flag = handle_collision(player_car)
 
     reward_gates.passed_gate(player_car, game_info)
-    reward_gates.distance_to_gate(player_car.x, player_car.y)
-
-    pygame.display.update()
+    gate_dist = reward_gates.distance_to_gate(player_car.x, player_car.y)
 
     model_input = distances.append(player_car.vel)
+
+    pygame.display.update()
 
 pygame.quit()

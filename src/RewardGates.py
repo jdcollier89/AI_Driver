@@ -14,7 +14,6 @@ class RewardGate:
         for i in range(1, self.no_of_gates+1):
             fname = f"imgs/reward-gates/RewardGate{i}.png"
             self.reward_gate[i-1] = scale_image(pygame.image.load(fname), 0.9)
-
         # Set activate gate to first one
         self.reset()
 
@@ -24,7 +23,7 @@ class RewardGate:
     
     def return_active_mask(self):
         # return mask of activate gate
-        return pygame.mask.from_surface(self.reward_gate[self.active_gate])
+        return pygame.mask.from_surface(self.return_active())
     
     def reset(self):
         """
@@ -46,8 +45,11 @@ class RewardGate:
         return self.return_active_mask().centroid()
     
     def distance_to_gate(self, x, y):
+        """
+        Return the distance between given x,y coordinates and the next
+        reward gate (e.g. current active one).
+        """
         distance = distance_between_points(self.return_gate_posn(), (x,y))
-        print(distance)
         return distance
 
 
