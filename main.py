@@ -2,8 +2,6 @@ import pygame
 
 from src.Game import Game
 
-MANUAL_CONTROL = True
-
 run = True
 game = Game()
 FPS = 60
