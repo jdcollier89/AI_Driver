@@ -106,7 +106,7 @@ class AbstractCar:
         
 class PlayerCar(AbstractCar):
     IMG = scale_image(pygame.image.load("imgs/grey-car.png"), 0.55)
-    START_POS = (175, 200)
+    START_POS = (177, 245) #(175, 200)
 
     def __init__(self, max_vel, rotation_vel):
         super().__init__(max_vel, rotation_vel)

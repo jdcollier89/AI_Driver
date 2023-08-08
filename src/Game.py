@@ -29,6 +29,7 @@ class Game:
         self.game_info = GameInfo()
         self.beam_sensors = Sensor(WIN, TRACK_BORDER)
         self.reward_gates = RewardGate()
+        self.reward = 0
 
         self.clock = pygame.time.Clock()
         self.images = [(BACKGROUND, (0,0)), (TRACK, (0,0))]
@@ -152,15 +153,16 @@ class Game:
                 run = False
                 break
 
-        model_input = self.game_loop(action_no)
+        self.game_loop(action_no)
 
-        return run, model_input
+        return run
     
     def game_loop(self, action_no):
         """
         Given a set action number, iterate the game state by one tick.
         """
-        
+        self.reward = -1
+
         if self.player_car.bounce_flag > 0:
             # Overwrite player input to "Do Nothing"
             self.player_car.bounce_flag -= 1
@@ -168,15 +170,30 @@ class Game:
 
         self.player_car.take_action(action_no)
 
-        distances = self.beam_sensors.beam_distances(self.player_car)
+        passed = self.reward_gates.passed_gate(self.player_car, self.game_info)
+        if passed:
+            self.reward = 10
+
 
         if self.player_car.bounce_flag == 0:
             self.player_car.bounce_flag = self.handle_collision()
 
-        self.reward_gates.passed_gate(self.player_car, self.game_info)
+        return
+    
+    def game_state(self):
+        distances = self.beam_sensors.beam_distances(self.player_car)
+
         gate_dist = self.reward_gates.distance_to_gate(self.player_car.x, self.player_car.y)
 
-        model_input = distances.append(self.player_car.vel)
-        model_input = distances.append(gate_dist)
+        model_input = distances
+        model_input.append(self.player_car.vel)
+        model_input.append(gate_dist)
 
-        return model_input
+        done = self.game_finished()
+        if done:
+            self.reward = -100
+
+        return model_input, self.reward, done
+    
+    def game_finished(self):
+        return self.player_car.dead

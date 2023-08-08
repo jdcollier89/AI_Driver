@@ -63,9 +63,11 @@ class Sensor:
         s_beam = self.draw_beam(-player_car.angle + 90, origin)
         sw_beam = self.draw_beam(-player_car.angle + 135, origin)
         w_beam = self.draw_beam(-player_car.angle + 180, origin)
-        nw_beam = self.draw_beam(-player_car.angle + 225, origin)
+        #nw_beam = self.draw_beam(-player_car.angle + 225, origin)
+        nw_beam = self.draw_beam(-player_car.angle + 240, origin)
         n_beam = self.draw_beam(-player_car.angle + 270, origin)
-        ne_beam = self.draw_beam(-player_car.angle + 315, origin)
+        #ne_beam = self.draw_beam(-player_car.angle + 315, origin)
+        ne_beam = self.draw_beam(-player_car.angle + 300, origin)
 
         distance_array = [
             distance_between_points(n_beam, origin), distance_between_points(ne_beam, origin), 

@@ -1,10 +1,12 @@
 import pygame
+import math
+
 from src.utils import scale_image
 from src.Cars import PlayerCar
 from src.GameInfo import GameInfo
 from src.utils import distance_between_points
 
-START_GATE = 1
+START_GATE = 0
 
 class RewardGate:
     def __init__(self):
@@ -51,7 +53,14 @@ class RewardGate:
         """
         distance = distance_between_points(self.return_gate_posn(), (x,y))
         return distance
+    
+    # def angle_to_gate(self, x, y):
+    #     (gate_x, gate_y) = self.return_gate_posn()
+    #     adj = gate_x - x
+    #     opp = gate_y - y
+    #     angle = math.atan(adj/opp)
 
+    #     return angle
 
     def passed_gate(self, player_car, game_info):
         """
@@ -62,3 +71,6 @@ class RewardGate:
         if player_car.collide(gate_mask) != None:
             game_info.score += 1
             self.increment_gate()
+            return True
+        else:
+            return False
