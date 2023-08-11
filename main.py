@@ -20,20 +20,19 @@ from src.Game import Game
 
 # pygame.quit()
 
-train_model = True
+train_model = False
 
 if __name__ == '__main__':
     game = Game()
 
-    ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.99, n_actions=9, epsilon=1.0, batch_size=32, input_dims=10)
-    # Should up to 12 input dims --> angle to reward gate + drift mom
+    ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.9, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12)
 
     if train_model:
         # Train Model
         current_ep = 0
-        n_games = 100
+        n_games = 1000
         max_steps = 3600
-        #ddqn_agent.load_model()
+        current_ep = ddqn_agent.load_model()
         ddqn_scores = []
         eps_history = []
 
@@ -48,7 +47,6 @@ if __name__ == '__main__':
                 lifespan = lifespan_
                 lifespan_ += 1
                 action = ddqn_agent.choose_action(game_state)
-                #action = action + 1 # Account for index offset
                 game.game_loop(action+1)
                 game_state_, reward, done = game.game_state()
                 score += reward
@@ -60,15 +58,17 @@ if __name__ == '__main__':
                 if steps % 100 == 0:
                     print(f"{steps} steps done!")
                 steps += 1
+                game.draw()
+                #pygame.display.update()
 
             eps_history.append(ddqn_agent.epsilon) # Look at training steps instead?
             ddqn_scores.append(score)
 
             print('Episode no ', current_ep, 'score %.2f' % score, 'lifespan ', lifespan)
                 
-            if current_ep % 1 == 0 and current_ep > 0:
-                ddqn_agent.save_model()
-                print(f"Saving model after {ddqn_agent.epsilon_step} - episode {current_ep}")
+            if current_ep % 10 == 0:
+                ddqn_agent.save_model(current_ep)
+                print(f"Saving model after {ddqn_agent.epsilon_step} training steps <- episode {current_ep}")
 
             current_ep += 1
     else:
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         run = True
         FPS = 60
         clock = pygame.time.Clock()
-        ddqn_agent.load_model()
+        _ = ddqn_agent.load_model()
         while run:
             clock.tick(FPS)
             game.draw()
@@ -86,6 +86,7 @@ if __name__ == '__main__':
             game.game_loop(action+1)
             game_state, reward, done = game.game_state()
             if done:
-                run = False
+                #run = False
+                game.game_reset()
             pygame.display.update()
         pygame.quit()

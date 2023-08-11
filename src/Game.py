@@ -77,9 +77,10 @@ class Game:
         Reset all elements of the game
         """
         self.player_car.reset()
+        self.player_car.dead = False
         self.game_info.reset()
         self.reward_gates.reset()
-    
+        
     def detect_input(self):
         """
         Detect the manual input and assign appropriate action number.
@@ -170,10 +171,14 @@ class Game:
 
         self.player_car.take_action(action_no)
 
+        if abs(self.player_car.vel) < 0.1: # Incentivize speed!
+            self.reward = -5
+        elif abs(self.player_car.vel) < 1:
+            self.reward = -3
         passed = self.reward_gates.passed_gate(self.player_car, self.game_info)
         if passed:
-            self.reward = 10
-
+            print("Reward gate passed!")
+            self.reward = 25
 
         if self.player_car.bounce_flag == 0:
             self.player_car.bounce_flag = self.handle_collision()
@@ -184,16 +189,31 @@ class Game:
         distances = self.beam_sensors.beam_distances(self.player_car)
 
         gate_dist = self.reward_gates.distance_to_gate(self.player_car.x, self.player_car.y)
+        gate_angle = self.reward_gate_angle()
 
         model_input = distances
         model_input.append(self.player_car.vel)
+        model_input.append(self.player_car.driftMomentum)
         model_input.append(gate_dist)
+        model_input.append(gate_angle)
 
         done = self.game_finished()
         if done:
             self.reward = -100
-
         return model_input, self.reward, done
     
     def game_finished(self):
         return self.player_car.dead
+    
+    def reward_gate_angle(self):
+        """
+        Calculate the angle from forward of car to centroid of next reward gate.
+        """
+        angle = self.reward_gates.angle_to_gate(self.player_car.x, self.player_car.y)
+        angle = angle - self.player_car.angle
+        angle = angle % 360
+        if angle > 180:
+            angle -= 360
+        elif angle < -179:
+            angle += 360
+        return angle

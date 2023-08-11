@@ -54,6 +54,26 @@ class ExperienceBuffer:
 
         return states, actions, rewards, new_states, terminal
     
+    def save_buffer(self,filename):
+        """
+        Save contents of the memory buffer to external files.
+        """
+        np.save(filename + '_state', self.state_memory)
+        np.save(filename + '_new_state', self.new_state_memory)
+        np.save(filename + '_action', self.action_memory)
+        np.save(filename + '_reward', self.reward_memory)
+        np.save(filename + '_terminal', self.terminal_memory)
+
+    def load_buffer(self,filename):
+        """
+        Load contents of the memory buffer from external files.
+        """
+        self.state_memory = np.load(filename + '_state.npy')
+        self.new_state_memory = np.load(filename + '_new_state.npy')
+        self.action_memory = np.load(filename + '_action.npy')
+        self.reward_memory = np.load(filename + '_reward.npy')
+        self.terminal_memory = np.load(filename + '_terminal.npy')
+    
 def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
     """
     lr = learning rate
@@ -75,7 +95,8 @@ def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
 class DDQNAgent:
     def __init__(self, alpha, gamma, n_actions, epsilon, batch_size,
                  input_dims, epsilon_dec=0.00001, epsilon_end=0.01,
-                 mem_size=1000000, fname='ddqn_model.h5', replace_target=100):
+                 mem_size=100000, fname='ddqn_model.h5', replace_target=1000,
+                 parameter_fname = 'ddqn_model'):
         """replace_target = how often to update the target model"""
         
         self.n_actions = n_actions
@@ -90,6 +111,7 @@ class DDQNAgent:
 
         self.batch_size = batch_size
         self.model_file = fname
+        self.param_fname = parameter_fname
         self.replace_target = replace_target
         self.memory = ExperienceBuffer(mem_size, input_dims, n_actions, True)
 
@@ -153,11 +175,23 @@ class DDQNAgent:
         """
         self.q_target.set_weights(self.q_eval.get_weights())
 
-    def save_model(self):
+    def save_model(self, ep_no):
         self.q_eval.save(self.model_file)
+        self.memory.save_buffer(self.param_fname)
+
+        steps = np.array([ep_no, self.epsilon_step, self.memory.mem_count])
+        np.save(self.param_fname + '_steps', steps)
 
     def load_model(self):
         self.q_eval = load_model(self.model_file)
+        self.memory.load_buffer(self.param_fname)
+
+        steps = np.load(self.param_fname + '_steps.npy')
+        ep_no = steps[0] + 1 # Increment as we are starting a new episode
+        self.epsilon_step = steps[1]
+        self.memory.mem_count = steps[2]
 
         if self.epsilon >= self.epsilon_min:
             self.update_network_parameters()
+
+        return ep_no

@@ -54,13 +54,13 @@ class RewardGate:
         distance = distance_between_points(self.return_gate_posn(), (x,y))
         return distance
     
-    # def angle_to_gate(self, x, y):
-    #     (gate_x, gate_y) = self.return_gate_posn()
-    #     adj = gate_x - x
-    #     opp = gate_y - y
-    #     angle = math.atan(adj/opp)
+    def angle_to_gate(self, x, y):
+        (gate_x, gate_y) = self.return_gate_posn()
+        adj = gate_x - x
+        opp = gate_y - y
+        angle = math.degrees(math.atan(adj/opp))
 
-    #     return angle
+        return angle
 
     def passed_gate(self, player_car, game_info):
         """
