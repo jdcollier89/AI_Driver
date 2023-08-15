@@ -25,12 +25,12 @@ train_model = False
 if __name__ == '__main__':
     game = Game()
 
-    ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.9, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12)
+    ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.95, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12)
 
     if train_model:
         # Train Model
         current_ep = 0
-        n_games = 1000
+        n_games = 1010
         max_steps = 3600
         current_ep = ddqn_agent.load_model()
         ddqn_scores = []
@@ -46,7 +46,7 @@ if __name__ == '__main__':
             while steps < max_steps:
                 lifespan = lifespan_
                 lifespan_ += 1
-                action = ddqn_agent.choose_action(game_state)
+                action = ddqn_agent.choose_action_train(game_state)
                 game.game_loop(action+1)
                 game_state_, reward, done = game.game_state()
                 score += reward
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                     print(f"{steps} steps done!")
                 steps += 1
                 game.draw()
-                #pygame.display.update()
+                pygame.display.update()
 
             eps_history.append(ddqn_agent.epsilon) # Look at training steps instead?
             ddqn_scores.append(score)
@@ -79,14 +79,20 @@ if __name__ == '__main__':
         FPS = 60
         clock = pygame.time.Clock()
         _ = ddqn_agent.load_model()
+        steps = 0
         while run:
             clock.tick(FPS)
-            game.draw()
             action = ddqn_agent.choose_action(game_state)
             game.game_loop(action+1)
             game_state, reward, done = game.game_state()
             if done:
                 #run = False
                 game.game_reset()
+                game_state, reward, done = game.game_state()
+                steps = 0
+            steps += 1
+            if steps % 100 == 0:
+                print(f"{steps} steps done!")
+            game.draw()
             pygame.display.update()
         pygame.quit()

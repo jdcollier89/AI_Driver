@@ -2,78 +2,9 @@ from keras.layers import Dense, Activation
 from keras.models import Sequential, load_model
 from keras.optimizers import Adam
 import numpy as np
+from src.ExperienceReplay import ExperienceBuffer, PrioritisedMemory
 
-class ExperienceBuffer:
-    """
-    This class will be used to store the past experiences of the environment (up to max_size)
-    for the training of the DDQN model.
-    """
-    def __init__(self, max_size, input_shape, n_actions, discrete=False):
-        self.mem_size = max_size
-        self.mem_count = 0
-        self.discrete = discrete
 
-        # Memory Buffers - could also use deque instead of numpy arrays
-        self.state_memory = np.zeros((self.mem_size, input_shape))
-        self.new_state_memory = np.zeros((self.mem_size, input_shape))
-        dtype = np.int8 if self.discrete else np.float32
-        self.action_memory = np.zeros((self.mem_size, n_actions), dtype=dtype)
-        self.reward_memory = np.zeros(self.mem_size)
-        self.terminal_memory = np.zeros(self.mem_size, dtype=np.float32)
-
-    def store_transition(self, state, action, reward, state_, done):
-        """
-        Store the latest experience of the model (for later use)
-        """
-        index = self.mem_count % self.mem_size
-        self.state_memory[index] = state
-        self.new_state_memory[index] = state_
-        if self.discrete:
-            # All zero except action taken
-            actions = np.zeros(self.action_memory.shape[1])
-            actions[action] = 1.0
-            self.action_memory[index] = actions
-        else:
-            self.action_memory[index] = action
-        self.reward_memory[index] = reward
-        self.terminal_memory[index] = 1 - int(done)
-        self.mem_count += 1
-
-    def sample_buffer(self, batch_size):
-        """
-        Return a random sample of `batch_size` previous experiences for
-        training.
-        """
-        max_mem = min(self.mem_count, self.mem_size) # Avoid sampling empty entries
-        batch = np.random.choice(max_mem, batch_size)
-        states = self.state_memory[batch]
-        new_states = self.new_state_memory[batch]
-        actions = self.action_memory[batch]
-        rewards = self.reward_memory[batch]
-        terminal = self.terminal_memory[batch]
-
-        return states, actions, rewards, new_states, terminal
-    
-    def save_buffer(self,filename):
-        """
-        Save contents of the memory buffer to external files.
-        """
-        np.save(filename + '_state', self.state_memory)
-        np.save(filename + '_new_state', self.new_state_memory)
-        np.save(filename + '_action', self.action_memory)
-        np.save(filename + '_reward', self.reward_memory)
-        np.save(filename + '_terminal', self.terminal_memory)
-
-    def load_buffer(self,filename):
-        """
-        Load contents of the memory buffer from external files.
-        """
-        self.state_memory = np.load(filename + '_state.npy')
-        self.new_state_memory = np.load(filename + '_new_state.npy')
-        self.action_memory = np.load(filename + '_action.npy')
-        self.reward_memory = np.load(filename + '_reward.npy')
-        self.terminal_memory = np.load(filename + '_terminal.npy')
-    
 def build_dqn(lr, n_actions, input_dims, fc1_dims, fc2_dims):
     """
     lr = learning rate
@@ -113,33 +44,44 @@ class DDQNAgent:
         self.model_file = fname
         self.param_fname = parameter_fname
         self.replace_target = replace_target
-        self.memory = ExperienceBuffer(mem_size, input_dims, n_actions, True)
+        #self.memory = ExperienceBuffer(mem_size, input_dims, n_actions, True)
+        self.memory = PrioritisedMemory(mem_size, input_dims, n_actions, True)
 
-        self.q_eval = build_dqn(alpha, n_actions, input_dims, 256, 256)
-        self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
+        # self.q_eval = build_dqn(alpha, n_actions, input_dims, 256, 256)
+        # self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
+        self.q_eval = build_dqn(alpha, n_actions, input_dims, 32, 32)
+        self.q_target = build_dqn(alpha, n_actions, input_dims, 32, 32)
 
     def remember(self, state, action, reward, new_state, done):
         self.memory.store_transition(state, action, reward, new_state, done)
 
-    def choose_action(self, state):
-        state = np.array(state).astype(np.float32)
-        state = state[np.newaxis,:]
-        # Either explore or follow policy
+    def choose_action_train(self, state):
+        """
+        Choose the action, but factor in exploration (based on epsilon)
+        """
         rand = np.random.random()
         if rand < self.epsilon:
             action = np.random.choice(self.action_space)
         else:
-            actions = self.q_eval.predict(state, verbose=0)
-            action = np.argmax(actions)
+            action = self.choose_action(state)
 
         # Return index of chosen action - start from 0
         return action
     
+    def choose_action(self, state):
+        state = np.array(state).astype(np.float32)
+        state = state[np.newaxis,:]
+        actions = self.q_eval.predict(state, verbose=0)
+        action = np.argmax(actions)
+        return action
+
     def train(self):
         # Instead of filling memory buffer with random input, don't train until buffer full
         if self.memory.mem_count > self.batch_size:
-            state, action, reward, new_state, done = \
-                    self.memory.sample_buffer(self.batch_size)
+            # state, action, reward, new_state, done = \
+            #         self.memory.sample_buffer(self.batch_size)
+            batchIndexes, state, action, reward, new_state, done, batchISWeights = \
+                        self.memory.sample_buffer(self.batch_size)
             action_values = np.array(self.action_space, dtype=np.int8)
             action_indices = np.dot(action, action_values)
 
@@ -157,11 +99,15 @@ class DDQNAgent:
             q_target[batch_index, action_indices] = reward + \
                 self.gamma * q_next[batch_index, max_actions.astype(int)] * done
             
-            _ = self.q_eval.fit(state, q_target, verbose=0)
+            absError = abs(q_pred[batch_index, action_indices] - q_target[batch_index, action_indices])
+            
+            #_ = self.q_eval.fit(state, q_target, verbose=0)
+            _ = self.q_eval.fit(state, q_target, verbose=0, sample_weight=batchISWeights)
+
+            self.memory.batchUpdate(batchIndexes, absError)
 
             # self.epsilon = self.epsilon*self.epsilon_dec if self.epsilon > \
             #                 self.epsilon_min else self.epsilon_min
-
             self.epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(
                 -self.epsilon_dec * self.epsilon_step)
             
@@ -177,21 +123,26 @@ class DDQNAgent:
 
     def save_model(self, ep_no):
         self.q_eval.save(self.model_file)
-        self.memory.save_buffer(self.param_fname)
+        treeIndex = self.memory.save_buffer(self.param_fname)
 
-        steps = np.array([ep_no, self.epsilon_step, self.memory.mem_count])
+        steps = np.array([ep_no, self.epsilon_step, self.memory.mem_count, treeIndex])
         np.save(self.param_fname + '_steps', steps)
 
     def load_model(self):
-        self.q_eval = load_model(self.model_file)
-        self.memory.load_buffer(self.param_fname)
-
         steps = np.load(self.param_fname + '_steps.npy')
         ep_no = steps[0] + 1 # Increment as we are starting a new episode
         self.epsilon_step = steps[1]
         self.memory.mem_count = steps[2]
+        treeIndex = steps[3]
+
+        self.q_eval = load_model(self.model_file)
+        self.memory.load_buffer(self.param_fname, treeIndex)
 
         if self.epsilon >= self.epsilon_min:
             self.update_network_parameters()
 
+        print(f"Loaded model...")
+        print(f"Latest completed episode is {ep_no}.")
+        print(f"No. of previous memories loaded is {self.memory.mem_count}.")
+        
         return ep_no
