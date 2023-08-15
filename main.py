@@ -25,7 +25,8 @@ train_model = False
 if __name__ == '__main__':
     game = Game()
 
-    ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.95, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12)
+    ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.95, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12, 
+                           fname='model/ddqn_model.h5', parameter_fname = 'model/ddqn_model')
 
     if train_model:
         # Train Model
