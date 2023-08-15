@@ -43,6 +43,7 @@ if __name__ == '__main__':
             game.game_reset()
             game_state, reward, done = game.game_state()
             steps = 0
+            game.draw()
 
             while steps < max_steps:
                 lifespan = lifespan_
@@ -81,6 +82,7 @@ if __name__ == '__main__':
         clock = pygame.time.Clock()
         _ = ddqn_agent.load_model()
         steps = 0
+        game.draw()
         while run:
             clock.tick(FPS)
             action = ddqn_agent.choose_action(game_state)
