@@ -106,14 +106,19 @@ class DDQNAgent:
 
             self.memory.batchUpdate(batchIndexes, absError)
 
-            # self.epsilon = self.epsilon*self.epsilon_dec if self.epsilon > \
-            #                 self.epsilon_min else self.epsilon_min
-            self.epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(
-                -self.epsilon_dec * self.epsilon_step)
+            self.update_epsilon()
             
             self.epsilon_step += 1
             if self.memory.mem_count % self.replace_target == 0:
                 self.update_network_parameters()
+
+    def update_epsilon(self):
+        # self.epsilon = self.epsilon*self.epsilon_dec if self.epsilon > \
+        #                 self.epsilon_min else self.epsilon_min
+        self.epsilon = self.epsilon_min + (self.epsilon_max - self.epsilon_min) * np.exp(
+                -self.epsilon_dec * self.epsilon_step)
+        return
+        
 
     def update_network_parameters(self):
         """
@@ -137,9 +142,9 @@ class DDQNAgent:
 
         self.q_eval = load_model(self.model_file)
         self.memory.load_buffer(self.param_fname, treeIndex)
-
-        if self.epsilon >= self.epsilon_min:
-            self.update_network_parameters()
+        self.update_epsilon()
+        
+        self.update_network_parameters()
 
         print(f"Loaded model...")
         print(f"Latest completed episode is {ep_no}.")
