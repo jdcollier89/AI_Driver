@@ -31,7 +31,7 @@ if __name__ == '__main__':
     if train_model:
         # Train Model
         current_ep = 0
-        n_games = 1010
+        n_games = 2000
         max_steps = 3600
         current_ep = ddqn_agent.load_model()
         ddqn_scores = []
@@ -61,7 +61,7 @@ if __name__ == '__main__':
                     print(f"{steps} steps done!")
                 steps += 1
                 game.draw()
-                pygame.display.update()
+                #pygame.display.update()
 
             eps_history.append(ddqn_agent.epsilon) # Look at training steps instead?
             ddqn_scores.append(score)

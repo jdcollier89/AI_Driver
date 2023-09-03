@@ -177,7 +177,7 @@ class Game:
             self.reward = -3
         passed = self.reward_gates.passed_gate(self.player_car, self.game_info)
         if passed:
-            print("Reward gate passed!")
+            print(f"Reward gate passed!- {self.reward_gates.active_gate}")
             self.reward = 25
 
         if self.player_car.bounce_flag == 0:
