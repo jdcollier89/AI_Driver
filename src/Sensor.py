@@ -2,7 +2,7 @@ import pygame
 import math
 from src.utils import distance_between_points
 
-DEBUG_SENSORS = True
+DEBUG_SENSORS = False
 
 class Sensor:
     def __init__(self, surface, track_border):

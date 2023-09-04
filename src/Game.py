@@ -25,11 +25,12 @@ pygame.display.set_caption("Car Driving")
 class Game:
     def __init__(self):
         self.MANUAL_CONTROL = False
-        self.player_car = PlayerCar(6, 5)
+        self.player_car = PlayerCar(8, 5)
         self.game_info = GameInfo()
         self.beam_sensors = Sensor(WIN, TRACK_BORDER)
         self.reward_gates = RewardGate()
         self.reward = 0
+        self.gate_count = 0 # 
 
         self.clock = pygame.time.Clock()
         self.images = [(BACKGROUND, (0,0)), (TRACK, (0,0))]
@@ -80,6 +81,7 @@ class Game:
         self.player_car.dead = False
         self.game_info.reset()
         self.reward_gates.reset()
+        self.gate_count = 0
         
     def detect_input(self):
         """
@@ -177,8 +179,9 @@ class Game:
             self.reward = -3
         passed = self.reward_gates.passed_gate(self.player_car, self.game_info)
         if passed:
-            print(f"Reward gate passed!- {self.reward_gates.active_gate}")
+            # print(f"Reward gate passed!- {self.reward_gates.active_gate}")
             self.reward = 25
+            self.gate_count += 1
 
         if self.player_car.bounce_flag == 0:
             self.player_car.bounce_flag = self.handle_collision()

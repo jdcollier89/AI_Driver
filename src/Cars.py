@@ -8,7 +8,7 @@ class AbstractCar:
         self.img = self.IMG # Pickup img from child
         self.max_vel = max_vel
         self.rotation_vel = rotation_vel
-        self.acceleration = 0.1
+        self.acceleration = 0.2
         self.driftFriction = 0.75 # Amount to reduce drift by each tick
         self.driftMomentum = 0
         self.reset()
