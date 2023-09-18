@@ -50,7 +50,7 @@ def train():
         game.game_reset()
         game_state, reward, done = game.game_state()
         steps = 0
-        game.draw()
+        game.draw(display=False)
 
         while steps < max_steps:
             lifespan = lifespan_
@@ -79,7 +79,7 @@ def train():
             
         if current_ep % 25 == 0:
             ddqn_agent.save_model(current_ep)
-            print(f"Saving model after {ddqn_agent.epsilon_step} training steps <- episode {current_ep}")
+            print(f"Saved model after {ddqn_agent.epsilon_step} training steps <- episode {current_ep}")
 
         current_ep += 1
 

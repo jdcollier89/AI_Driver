@@ -46,7 +46,6 @@ class PrioritisedMemory:
             actions = np.zeros(self.action_memory.shape[1])
             actions[action] = 1.0
             self.action_memory[index] = actions
-            actions = None
         else:
             self.action_memory[index] = action
         self.reward_memory[index] = reward

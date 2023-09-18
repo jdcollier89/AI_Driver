@@ -9,7 +9,7 @@ def scale_image(img, factor):
     size = round(img.get_width()*factor), round(img.get_height()*factor)
     return pygame.transform.scale(img, size)
 
-def blit_rotate_center(win, image, center, angle):
+def blit_rotate_center(win, image, center, angle, display=True):
     """
     Rotate an image around its center point.
     Returns the rotated image and its top left coords.

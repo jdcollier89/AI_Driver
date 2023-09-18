@@ -55,7 +55,7 @@ class Game:
 
             #WIN.blit(self.reward_gates.return_active(), (0,0))
 
-        self.player_car.draw(WIN)
+        self.player_car.draw(WIN, display=display)
 
     def handle_collision(self):
         """

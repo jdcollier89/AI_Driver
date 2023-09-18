@@ -32,7 +32,7 @@ class AbstractCar:
         elif right:
             self.angle -= self.rotation_vel * multiplier
 
-    def draw(self, win):
+    def draw(self, win, display=True):
         self.rot_img, (self.rot_x, self.rot_y) = blit_rotate_center(
             win, self.img, (self.x, self.y), self.angle)
 
