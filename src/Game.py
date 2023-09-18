@@ -35,24 +35,25 @@ class Game:
         self.clock = pygame.time.Clock()
         self.images = [(BACKGROUND, (0,0)), (TRACK, (0,0))]
 
-    def draw(self):
+    def draw(self, display = True):
         """
         Draw the background, text and player car to the screen
         """
 
-        for img, pos in self.images:
-            WIN.blit(img, pos)
+        if display:
+            for img, pos in self.images:
+                WIN.blit(img, pos)
 
-        score_text = MAIN_FONT.render(f"Score: {self.game_info.score}", 1, (255, 255, 255))
-        WIN.blit(score_text, (10, HEIGHT - score_text.get_height() - 70))
+            score_text = MAIN_FONT.render(f"Score: {self.game_info.score}", 1, (255, 255, 255))
+            WIN.blit(score_text, (10, HEIGHT - score_text.get_height() - 70))
 
-        time_text = MAIN_FONT.render(f"Time: {self.game_info.get_level_time()}s", 1, (255, 255, 255))
-        WIN.blit(time_text, (10, HEIGHT - time_text.get_height() - 40))
+            time_text = MAIN_FONT.render(f"Time: {self.game_info.get_level_time()}s", 1, (255, 255, 255))
+            WIN.blit(time_text, (10, HEIGHT - time_text.get_height() - 40))
 
-        vel_text = MAIN_FONT.render(f"Vel: {round(self.player_car.vel, 1)}px/s", 1, (255, 255, 255))
-        WIN.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 10))
+            vel_text = MAIN_FONT.render(f"Vel: {round(self.player_car.vel, 1)}px/s", 1, (255, 255, 255))
+            WIN.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 10))
 
-        WIN.blit(self.reward_gates.return_active(), (0,0))
+            #WIN.blit(self.reward_gates.return_active(), (0,0))
 
         self.player_car.draw(WIN)
 

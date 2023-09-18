@@ -94,6 +94,7 @@ class AbstractCar:
         car_mask = pygame.mask.from_surface(self.rot_img)
         offset = (int(self.rot_x-x), int(self.rot_y-y))
         poi = mask.overlap(car_mask, offset)
+        car_mask = None # Deallocate for memory
         return poi
     
     def bounce(self):

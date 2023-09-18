@@ -2,6 +2,8 @@ from keras.layers import Dense, Activation
 from keras.models import Sequential, load_model
 from keras.optimizers import Adam
 import numpy as np
+from keras import backend as kback
+
 from src.ExperienceReplay import ExperienceBuffer, PrioritisedMemory
 
 
@@ -47,8 +49,6 @@ class DDQNAgent:
         #self.memory = ExperienceBuffer(mem_size, input_dims, n_actions, True)
         self.memory = PrioritisedMemory(mem_size, input_dims, n_actions, True)
 
-        # self.q_eval = build_dqn(alpha, n_actions, input_dims, 256, 256)
-        # self.q_target = build_dqn(alpha, n_actions, input_dims, 256, 256)
         self.q_eval = build_dqn(alpha, n_actions, input_dims, 32, 32)
         self.q_target = build_dqn(alpha, n_actions, input_dims, 32, 32)
 
@@ -73,6 +73,7 @@ class DDQNAgent:
         state = state[np.newaxis,:]
         actions = self.q_eval.predict(state, verbose=0)
         action = np.argmax(actions)
+        del state
         return action
 
     def train(self):
@@ -107,10 +108,11 @@ class DDQNAgent:
             self.memory.batchUpdate(batchIndexes, absError)
 
             self.update_epsilon()
-            
             self.epsilon_step += 1
             if self.memory.mem_count % self.replace_target == 0:
                 self.update_network_parameters()
+            kback.clear_session()
+        return
 
     def update_epsilon(self):
         # self.epsilon = self.epsilon*self.epsilon_dec if self.epsilon > \
@@ -125,6 +127,7 @@ class DDQNAgent:
         Update QTarget with the weights of QEval model
         """
         self.q_target.set_weights(self.q_eval.get_weights())
+        return
 
     def save_model(self, ep_no):
         self.q_eval.save(self.model_file)
@@ -132,6 +135,7 @@ class DDQNAgent:
 
         steps = np.array([ep_no, self.epsilon_step, self.memory.mem_count, treeIndex])
         np.save(self.param_fname + '_steps', steps)
+        return
 
     def load_model(self):
         steps = np.load(self.param_fname + '_steps.npy')

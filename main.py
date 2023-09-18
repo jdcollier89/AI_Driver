@@ -1,6 +1,7 @@
 import pygame
 import click
 import numpy as np
+import gc
 
 from src.ddqn import DDQNAgent
 from src.Game import Game
@@ -30,6 +31,7 @@ def manual():
 @cli.command()
 def train():
     game = Game()
+    pygame.event.set_allowed([pygame.QUIT])
 
     ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.95, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12, 
                            fname='model/ddqn_model.h5', parameter_fname = 'model/ddqn_model')
@@ -39,8 +41,8 @@ def train():
     n_games = 10000
     max_steps = 3600
     current_ep = ddqn_agent.load_model()
-    ddqn_scores = []
-    eps_history = []
+    #ddqn_scores = []
+    #eps_history = []
 
     while current_ep <= n_games:
         score = 0
@@ -65,15 +67,17 @@ def train():
             # if steps % 100 == 0:
             #     print(f"{steps} steps done!")
             steps += 1
-            game.draw()
+            game.draw(display=False)
             #pygame.display.update()
 
         #eps_history.append(ddqn_agent.epsilon) # Look at training steps instead?
         #ddqn_scores.append(score)
         print(f'Episode finished with {game.gate_count} reward gates passed.')
         print('Episode no ', current_ep, 'score %.2f' % score, 'lifespan ', lifespan)
+        
+        gc.collect()
             
-        if current_ep % 100 == 0:
+        if current_ep % 25 == 0:
             ddqn_agent.save_model(current_ep)
             print(f"Saving model after {ddqn_agent.epsilon_step} training steps <- episode {current_ep}")
 
