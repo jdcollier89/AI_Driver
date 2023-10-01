@@ -23,10 +23,9 @@ class PrioritisedMemory:
 
         self.state_memory = np.zeros((self.mem_size, input_shape))
         self.new_state_memory = np.zeros((self.mem_size, input_shape))
-        dtype = np.int8 if self.discrete else np.float32
-        self.action_memory = np.zeros((self.mem_size, n_actions), dtype=dtype)
+        self.action_memory = np.zeros((self.mem_size, n_actions), dtype=np.int8)
         self.reward_memory = np.zeros(self.mem_size)
-        self.terminal_memory = np.zeros(self.mem_size, dtype=np.float32)
+        self.terminal_memory = np.zeros(self.mem_size, dtype=np.int8)
 
         self.mem_count = 0 # Current memory count
         self.real_size = 0 # No of entries actually in buffer
@@ -54,13 +53,12 @@ class PrioritisedMemory:
 
         self.mem_count += 1
         self.read_size = min(self.mem_size, self.real_size + 1) # Needed?
+        return
 
 
     def sample_buffer(self, batch_size):
         batchIndexes = []
         sampleIndexes = []
-        #batchIndexes = np.zeros([batch_size], dtype=np.int32)
-        #sampleIndexes = np.zeros([batch_size], dtype=np.int32)
         batchISWeights = np.zeros([batch_size], dtype=np.float32)
 
         # so we divide the priority space up into n different priority segments
@@ -75,7 +73,10 @@ class PrioritisedMemory:
         # we are going to need to get the maximum weight and divide all weights by that
 
         # the largest weight will have the lowest priority and thus the lowest probability of being chosen
-        minPriority = np.min(np.maximum(self.sumTree.tree[self.sumTree.indexOfFirstData:], self.eps))
+        #minPriority = np.min(np.maximum(self.sumTree.tree[self.sumTree.indexOfFirstData:], self.eps))
+        minPriority = np.min(self.sumTree.tree[self.sumTree.indexOfFirstData:])
+        minPriority = max(minPriority, self.eps) # Cannot go lower than epsilon
+        
         minProbability = minPriority / totalPriority
         maxWeight = (minProbability * batch_size) ** (-self.b)
 
@@ -122,6 +123,8 @@ class PrioritisedMemory:
             self.sumTree.update(treeIndex, priority)
 
             self.max_priority = max(self.max_priority, priority)
+            
+        return
 
     def save_buffer(self, filename):
         """
@@ -146,6 +149,7 @@ class PrioritisedMemory:
         self.reward_memory = np.load(filename + '_reward.npy')
         self.terminal_memory = np.load(filename + '_terminal.npy')
         self.sumTree.load_tree(filename, treePointer)
+        return
 
 
 class ExperienceBuffer:
@@ -164,7 +168,7 @@ class ExperienceBuffer:
         dtype = np.int8 if self.discrete else np.float32
         self.action_memory = np.zeros((self.mem_size, n_actions), dtype=dtype)
         self.reward_memory = np.zeros(self.mem_size)
-        self.terminal_memory = np.zeros(self.mem_size, dtype=np.float32)
+        self.terminal_memory = np.zeros(self.mem_size, dtype=np.int8)
 
     def store_transition(self, state, action, reward, state_, done):
         """

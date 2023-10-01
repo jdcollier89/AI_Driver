@@ -5,7 +5,7 @@ class SumTree:
         self.capacity = capacity
         self.size = 2 * capacity - 1
         self.tree = np.zeros(self.size)
-        self.data = np.zeros(capacity, dtype=object)
+        self.data = np.zeros(capacity, dtype=int)
         self.dataPointer = 0
         self.indexOfFirstData = capacity - 1
 

@@ -8,7 +8,7 @@ class AbstractCar:
         self.img = self.IMG # Pickup img from child
         self.max_vel = max_vel
         self.rotation_vel = rotation_vel
-        self.acceleration = 0.1
+        self.acceleration = 0.2
         self.driftFriction = 0.75 # Amount to reduce drift by each tick
         self.driftMomentum = 0
         self.reset()
@@ -32,7 +32,7 @@ class AbstractCar:
         elif right:
             self.angle -= self.rotation_vel * multiplier
 
-    def draw(self, win):
+    def draw(self, win, display=True):
         self.rot_img, (self.rot_x, self.rot_y) = blit_rotate_center(
             win, self.img, (self.x, self.y), self.angle)
 
@@ -94,6 +94,7 @@ class AbstractCar:
         car_mask = pygame.mask.from_surface(self.rot_img)
         offset = (int(self.rot_x-x), int(self.rot_y-y))
         poi = mask.overlap(car_mask, offset)
+        car_mask = None # Deallocate for memory
         return poi
     
     def bounce(self):
