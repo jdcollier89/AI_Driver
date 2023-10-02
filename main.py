@@ -117,5 +117,63 @@ def test():
     pygame.quit()
 
 
+@cli.command()
+def record():
+    # Record the steps that are taken by a model for replay later
+    game = Game()
+
+    ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.95, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12, 
+                           fname='model/ddqn_model.h5', parameter_fname = 'model/ddqn_model')
+    game.game_reset()
+    game_state, _, done = game.game_state()
+
+    run = True
+    clock = pygame.time.Clock()
+    _ = ddqn_agent.load_model()
+    steps = 0
+    actions = []
+    game.draw()
+    while run:
+        clock.tick(FPS)
+        action = ddqn_agent.choose_action(game_state)
+        actions.append(action)
+        game.game_loop(action+1)
+        game_state, _, done = game.game_state()
+        steps += 1
+        game.draw()
+        pygame.display.update()
+        if done:
+            print(f'Attempt finished with {game.gate_count} reward gates passed, after {steps} steps.')
+            break
+    np.save('model/action_save', actions)
+    pygame.quit()
+
+@cli.command()
+def playback():
+    # Playback a pre-recorded game
+    game = Game()
+
+    game.game_reset()
+    game_state, _, done = game.game_state()
+
+    run = True
+    clock = pygame.time.Clock()
+
+    steps = 0
+    actions = np.load('model/action_save.npy')
+    game.draw()
+    while run:
+        clock.tick(FPS)
+        action = actions[steps]
+        game.game_loop(action+1)
+        game_state, _, done = game.game_state()
+        steps += 1
+        game.draw()
+        pygame.display.update()
+        if steps == len(actions):
+            print(f'Attempt finished with {game.gate_count} reward gates passed, after {steps} steps.')
+            break
+    pygame.quit()
+
 if __name__ == '__main__':
     cli()

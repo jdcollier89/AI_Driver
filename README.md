@@ -20,6 +20,10 @@ for example, to further train a model you would use the command `python main.py 
 
 - **manual**: Play the game yourself, with no AI involvement, and controlling the car with **W, A, S** and **D** keys. In manual mode, a collision with the barrier will not result in a gameover, instead the car will bounce off.
 
+- **record**: Attempt to drive a car around the track using the currently trained model and save each step as a series of actions in the `model` subdirectory.
+
+- **playback**: Playback a previously recorded model run from the **record** command. This is useful when checking the performance of the model on a less powerful machine (as model predictions will not be required in realtime; meaning that PyGame can stick to its chosen FPS).
+
 ## How the reinforcement model works
 
 ### Rewards
