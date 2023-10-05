@@ -12,15 +12,13 @@ MAIN_FONT = pygame.font.SysFont("comicsans", 40)
 
 BACKGROUND = scale_image(pygame.image.load("imgs/green-grass-background.jpg"), 0.35)
 TRACK = scale_image(pygame.image.load("imgs/track.png"), 0.9)
-TRACK_BORDER = scale_image(pygame.image.load("imgs/track-border.png"), 0.9)
 
 WIDTH, HEIGHT = TRACK.get_width(), TRACK.get_height()
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Car Driving")
 
-BACKGROUND = BACKGROUND.convert()
-TRACK = TRACK.convert()
-TRACK_BORDER = TRACK_BORDER.convert()
+TRACK_BORDER = scale_image(pygame.image.load("imgs/track-border.png").convert(), 0.9)
+
 TRACK_BORDER_MASK = pygame.mask.from_surface(TRACK_BORDER)
 
 
