@@ -35,27 +35,26 @@ class Game:
         self.clock = pygame.time.Clock()
         self.images = [(BACKGROUND, (0,0)), (TRACK, (0,0))]
 
-    def draw(self, display = True):
+    def draw(self):
         """
         Draw the background, text and player car to the screen
         """
 
-        if display:
-            for img, pos in self.images:
-                WIN.blit(img, pos)
+        for img, pos in self.images:
+            WIN.blit(img, pos)
 
-            score_text = MAIN_FONT.render(f"Score: {self.game_info.score}", 1, (255, 255, 255))
-            WIN.blit(score_text, (10, HEIGHT - score_text.get_height() - 70))
+        score_text = MAIN_FONT.render(f"Score: {self.game_info.score}", 1, (255, 255, 255))
+        WIN.blit(score_text, (10, HEIGHT - score_text.get_height() - 70))
 
-            time_text = MAIN_FONT.render(f"Time: {self.game_info.get_level_time()}s", 1, (255, 255, 255))
-            WIN.blit(time_text, (10, HEIGHT - time_text.get_height() - 40))
+        time_text = MAIN_FONT.render(f"Time: {self.game_info.get_level_time()}s", 1, (255, 255, 255))
+        WIN.blit(time_text, (10, HEIGHT - time_text.get_height() - 40))
 
-            vel_text = MAIN_FONT.render(f"Vel: {round(self.player_car.vel, 1)}px/s", 1, (255, 255, 255))
-            WIN.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 10))
+        vel_text = MAIN_FONT.render(f"Vel: {round(self.player_car.vel, 1)}px/s", 1, (255, 255, 255))
+        WIN.blit(vel_text, (10, HEIGHT - vel_text.get_height() - 10))
 
-            #WIN.blit(self.reward_gates.return_active(), (0,0))
+        #WIN.blit(self.reward_gates.return_active(), (0,0))
 
-        self.player_car.draw(WIN, display=display)
+        self.player_car.draw(WIN)
 
     def handle_collision(self):
         """
@@ -141,6 +140,14 @@ class Game:
                 action_no = 4
 
         return action_no
+    
+    def check_exit(self):
+        run = True
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        return run
 
     def manual_loop(self):
         """
@@ -152,10 +159,7 @@ class Game:
 
         action_no = self.detect_input()
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                break
+        run = self.check_exit()
 
         self.game_loop(action_no)
 
@@ -186,6 +190,11 @@ class Game:
 
         if self.player_car.bounce_flag == 0:
             self.player_car.bounce_flag = self.handle_collision()
+
+        # Updating the car img is done after detecting collision etc as model was trained (erroneously)
+        # with it this way around. For correct behaviour, the update_car_img should really be in the
+        # player_car.rotate function call
+        self.player_car.update_car_img()
 
         return
     

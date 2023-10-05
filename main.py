@@ -12,21 +12,27 @@ FPS = 30
 def cli():
     pass
 
+
 @cli.command()
 def manual():
-    run = True
     game = Game()
     clock = pygame.time.Clock()
 
+    game.draw()
+    pygame.display.update()
+
+    run = True
     while run:
         clock.tick(FPS)
-        game.draw()
 
         run = game.manual_loop()
         _ = game.game_state()
+
+        game.draw()
         pygame.display.update()
 
     pygame.quit()
+
 
 @cli.command()
 def train():
@@ -41,8 +47,6 @@ def train():
     n_games = 10000
     max_steps = 3600
     current_ep = ddqn_agent.load_model()
-    #ddqn_scores = []
-    #eps_history = []
 
     while current_ep <= n_games:
         score = 0
@@ -50,7 +54,6 @@ def train():
         game.game_reset()
         game_state, reward, done = game.game_state()
         steps = 0
-        game.draw(display=False)
 
         while steps < max_steps:
             lifespan = lifespan_
@@ -62,16 +65,14 @@ def train():
             ddqn_agent.remember(game_state, action, reward, game_state_, done)
             game_state = game_state_
             ddqn_agent.train()
-            if done: # End episode if car crashed
+            running = game.check_exit()
+            if done or not(running): # End episode if car crashed
                 steps = max_steps
-            # if steps % 100 == 0:
-            #     print(f"{steps} steps done!")
             steps += 1
-            game.draw(display=False)
-            #pygame.display.update()
 
-        #eps_history.append(ddqn_agent.epsilon) # Look at training steps instead?
-        #ddqn_scores.append(score)
+        if not(running):
+            break
+        
         print(f'Episode finished with {game.gate_count} reward gates passed.')
         print('Episode no ', current_ep, 'score %.2f' % score, 'lifespan ', lifespan)
         
@@ -83,6 +84,9 @@ def train():
 
         current_ep += 1
 
+    pygame.quit()
+
+
 @cli.command()
 def test():
     # Test model
@@ -93,25 +97,22 @@ def test():
     game.game_reset()
     game_state, _, done = game.game_state()
 
-    run = True
     clock = pygame.time.Clock()
     _ = ddqn_agent.load_model()
-    steps = 0
     game.draw()
+    pygame.display.update()
+
+    run = True
     while run:
         clock.tick(FPS)
         action = ddqn_agent.choose_action(game_state)
         game.game_loop(action+1)
         game_state, _, done = game.game_state()
-        if done:
-            #run = False
+        run = game.check_exit()
+        if done: # End episode if car crashed
             print(f'Attempt finished with {game.gate_count} reward gates passed.')
             game.game_reset()
             game_state, _, done = game.game_state()
-            steps = 0
-        steps += 1
-        # if steps % 100 == 0:
-        #     print(f"{steps} steps done!")
         game.draw()
         pygame.display.update()
     pygame.quit()
@@ -127,12 +128,14 @@ def record():
     game.game_reset()
     game_state, _, done = game.game_state()
 
-    run = True
     clock = pygame.time.Clock()
     _ = ddqn_agent.load_model()
     steps = 0
     actions = []
     game.draw()
+    pygame.display.update()
+
+    run = True
     while run:
         clock.tick(FPS)
         action = ddqn_agent.choose_action(game_state)
@@ -142,11 +145,13 @@ def record():
         steps += 1
         game.draw()
         pygame.display.update()
-        if done:
+        run = game.check_exit()
+        if done: # End episode if car crashed
             print(f'Attempt finished with {game.gate_count} reward gates passed, after {steps} steps.')
             break
     np.save('model/action_save', actions)
     pygame.quit()
+
 
 @cli.command()
 def playback():
@@ -154,26 +159,30 @@ def playback():
     game = Game()
 
     game.game_reset()
-    game_state, _, done = game.game_state()
+    _, _, _ = game.game_state()
 
-    run = True
     clock = pygame.time.Clock()
 
     steps = 0
     actions = np.load('model/action_save.npy')
     game.draw()
+    pygame.display.update()
+
+    run = True
     while run:
         clock.tick(FPS)
         action = actions[steps]
         game.game_loop(action+1)
-        game_state, _, done = game.game_state()
+        _, _, _ = game.game_state()
         steps += 1
         game.draw()
+        run = game.check_exit()
         pygame.display.update()
         if steps == len(actions):
             print(f'Attempt finished with {game.gate_count} reward gates passed, after {steps} steps.')
             break
     pygame.quit()
+
 
 if __name__ == '__main__':
     cli()

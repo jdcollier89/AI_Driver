@@ -1,7 +1,7 @@
 import pygame
 import math
 
-from src.utils import blit_rotate_center, scale_image
+from src.utils import rotate_center, scale_image
 
 class AbstractCar:
     def __init__(self, max_vel, rotation_vel):
@@ -16,8 +16,7 @@ class AbstractCar:
     def reset(self):
         self.angle = 0
         self.x, self.y = self.START_POS # Define center of car
-        self.rot_x, self.rot_y = (0, 0) # Top left of rotated image
-        self.rot_img = self.img
+        self.update_car_img() # Update rotated image based on new position
         self.vel = 0
         self.driftMomentum = 0
 
@@ -31,10 +30,19 @@ class AbstractCar:
             self.angle += self.rotation_vel * multiplier
         elif right:
             self.angle -= self.rotation_vel * multiplier
+        
+    def update_car_img(self):
+        """
+        Calculate the new image/position of car based on current rotation
+        """
+        self.rot_img, (self.rot_x, self.rot_y) = rotate_center(
+                    self.img, (self.x, self.y), self.angle)
 
-    def draw(self, win, display=True):
-        self.rot_img, (self.rot_x, self.rot_y) = blit_rotate_center(
-            win, self.img, (self.x, self.y), self.angle)
+    def draw(self, win):
+        """
+        Draw the car on screen
+        """
+        win.blit(self.rot_img, (self.rot_x, self.rot_y))
 
     def move_forward(self, turn_left, turn_right):
         """
