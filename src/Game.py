@@ -10,10 +10,10 @@ pygame.font.init()
 
 MAIN_FONT = pygame.font.SysFont("comicsans", 40)
 
-BACKGROUND = scale_image(pygame.image.load("imgs/green-grass-background.jpg"), 0.35).convert()
+BACKGROUND = scale_image(pygame.image.load("imgs/green-grass-background.jpg").convert(), 0.35)
 
-TRACK = scale_image(pygame.image.load("imgs/track.png"), 0.9).convert()
-TRACK_BORDER = scale_image(pygame.image.load("imgs/track-border.png"), 0.9).convert()
+TRACK = scale_image(pygame.image.load("imgs/track.png").convert(), 0.9)
+TRACK_BORDER = scale_image(pygame.image.load("imgs/track-border.png").convert(), 0.9)
 
 TRACK_BORDER_MASK = pygame.mask.from_surface(TRACK_BORDER)
 
