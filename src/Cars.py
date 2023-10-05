@@ -5,7 +5,7 @@ from src.utils import rotate_center, scale_image
 
 class AbstractCar:
     def __init__(self, max_vel, rotation_vel):
-        self.img = self.IMG # Pickup img from child
+        self.img = self.IMG.convert() # Pickup img from child
         self.max_vel = max_vel
         self.rotation_vel = rotation_vel
         self.acceleration = 0.2
@@ -114,7 +114,7 @@ class AbstractCar:
 
         
 class PlayerCar(AbstractCar):
-    IMG = scale_image(pygame.image.load("imgs/grey-car.png").convert(), 0.55)
+    IMG = scale_image(pygame.image.load("imgs/grey-car.png"), 0.55)
     START_POS = (177, 245) #(175, 200)
 
     def __init__(self, max_vel, rotation_vel):
