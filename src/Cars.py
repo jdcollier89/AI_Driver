@@ -5,7 +5,7 @@ from src.utils import rotate_center, scale_image
 
 class AbstractCar:
     def __init__(self, max_vel, rotation_vel):
-        self.img = self.IMG.convert() # Pickup img from child
+        self.img = self.IMG.convert_alpha() # Pickup img from child
         self.max_vel = max_vel
         self.rotation_vel = rotation_vel
         self.acceleration = 0.2

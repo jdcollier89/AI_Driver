@@ -17,7 +17,7 @@ WIDTH, HEIGHT = TRACK.get_width(), TRACK.get_height()
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Car Driving")
 
-TRACK_BORDER = scale_image(pygame.image.load("imgs/track-border.png").convert(), 0.9)
+TRACK_BORDER = scale_image(pygame.image.load("imgs/track-border.png").convert_alpha(), 0.9)
 
 TRACK_BORDER_MASK = pygame.mask.from_surface(TRACK_BORDER)
 
