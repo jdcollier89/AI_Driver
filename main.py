@@ -159,7 +159,7 @@ def playback():
     game = Game()
 
     game.game_reset()
-    _, _, _ = game.game_state()
+    _ = game.game_state()
 
     clock = pygame.time.Clock()
 
@@ -173,11 +173,11 @@ def playback():
         clock.tick(FPS)
         action = actions[steps]
         game.game_loop(action+1)
-        _, _, _ = game.game_state()
+        _ = game.game_state()
         steps += 1
         game.draw()
-        run = game.check_exit()
         pygame.display.update()
+        run = game.check_exit()
         if steps == len(actions):
             print(f'Attempt finished with {game.gate_count} reward gates passed, after {steps} steps.')
             break

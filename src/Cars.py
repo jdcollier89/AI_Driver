@@ -30,6 +30,9 @@ class AbstractCar:
             self.angle += self.rotation_vel * multiplier
         elif right:
             self.angle -= self.rotation_vel * multiplier
+
+        # round self.angle to one decimal place
+        # store all the rotated images ahead of time
         
     def update_car_img(self):
         """
