@@ -91,6 +91,7 @@ def train():
 def test():
     # Test model
     game = Game()
+    pygame.event.set_allowed([pygame.QUIT])
 
     ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.95, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12, 
                            fname='model/ddqn_model.h5', parameter_fname = 'model/ddqn_model')
@@ -122,6 +123,7 @@ def test():
 def record():
     # Record the steps that are taken by a model for replay later
     game = Game()
+    pygame.event.set_allowed([pygame.QUIT])
 
     ddqn_agent = DDQNAgent(alpha=0.0005, gamma=0.95, n_actions=9, epsilon=1.0, batch_size=64, input_dims=12, 
                            fname='model/ddqn_model.h5', parameter_fname = 'model/ddqn_model')
@@ -131,6 +133,7 @@ def record():
     clock = pygame.time.Clock()
     _ = ddqn_agent.load_model()
     steps = 0
+    max_steps = 3600
     actions = []
     game.draw()
     pygame.display.update()
@@ -143,10 +146,12 @@ def record():
         game.game_loop(action+1)
         game_state, _, done = game.game_state()
         steps += 1
+        
         game.draw()
         pygame.display.update()
+
         run = game.check_exit()
-        if done: # End episode if car crashed
+        if done or (steps > max_steps): # End episode if car crashed
             print(f'Attempt finished with {game.gate_count} reward gates passed, after {steps} steps.')
             break
     np.save('model/action_save', actions)
@@ -157,6 +162,7 @@ def record():
 def playback():
     # Playback a pre-recorded game
     game = Game()
+    pygame.event.set_allowed([pygame.QUIT])
 
     game.game_reset()
     _ = game.game_state()
