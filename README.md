@@ -49,7 +49,7 @@ As the agent requires some sort of reward system, I have used a series of checkp
 ### Current Performance
 
 <p align="center">
-  <img src="./docs/air_car_drive.gif" width="650">
+  <img src="./docs/ai_car_drive.gif" width="650">
 </p>
 
 ## Possible extensions in the future
