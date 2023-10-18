@@ -14,15 +14,13 @@ Run the code in this repository with
 
 for example, to further train a model you would use the command `python main.py train`.
 
-- **train**: Load the model saved in the `model` subdirectory and continue the process of training. The will be loaded in with the model. No visuals will be shown while the model trains (in order to save resources).
-
-- **test**: Load the model saved in the `model` subdirectory and use it for automatic control of the car (PyGame screen will show the game in progress). 
-
-- **manual**: Play the game yourself, with no AI involvement, and controlling the car with **W, A, S** and **D** keys. In manual mode, a collision with the barrier will not result in a gameover, instead the car will bounce off.
-
-- **record**: Attempt to drive a car around the track using the currently trained model and save each step as a series of actions in the `model` subdirectory.
-
-- **playback**: Playback a previously recorded model run from the **record** command. This is useful when checking the performance of the model on a less powerful machine (as model predictions will not be required in realtime; meaning that PyGame can stick to its chosen FPS).
+| Command | Description |
+| :---: | ----------- |
+| **train** | Load the model saved in the `model` subdirectory and continue the process of training. The will be loaded in with the model. No visuals will be shown while the model trains (in order to save resources). |
+| **test** | Load the model saved in the `model` subdirectory and use it for automatic control of the car (PyGame screen will show the game in progress). |
+| **manual** | Play the game yourself, with no AI involvement, and controlling the car with **W, A, S** and **D** keys. In manual mode, a collision with the barrier will not result in a gameover, instead the car will bounce off. |
+| **record** | Attempt to drive a car around the track using the currently trained model and save each step as a series of actions in the `model` subdirectory. |
+| **playback** | Playback a previously recorded model run from the **record** command. This is useful when checking the performance of the model on a less powerful machine (as model predictions will not be required in realtime; meaning that PyGame can stick to its chosen FPS). |
 
 ## How the reinforcement model works
 
@@ -30,15 +28,13 @@ for example, to further train a model you would use the command `python main.py 
 
 As the agent requires some sort of reward system, I have used a series of checkpoints (or reward gates) at approximately equal distance along the track. The agent will receive a reward when passing through the active checkpoint, and will have input parameters giving the distance to the next reward gate and relative angle to the next gate (taking the direction the car is facing as 0 degrees).
 
-- Car Crashes: -100
-
-- Car passes a checkpoint (reward gate): 25
-
-- Car has velocity less than 0.1: -5 per tick
-
-- Car has velocity less than 1 (but more than 0.1): -3 per tick
-
-- Car has velocity of higher than 1: -1 per tick
+| Event | Reward |
+| --- | :-----------: |
+| Car Crashes | -100 |
+| Car passes a checkpoint (reward gate) | 25 |
+| Car has velocity less than 0.1 | -5 per tick |
+| Car has velocity less than 1 (but more than 0.1) | -3 per tick |
+| Car has velocity of higher than 1 | -1 per tick |
 
 ### Computer vision vectors
 
