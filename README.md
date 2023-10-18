@@ -46,7 +46,7 @@ As the agent requires some sort of reward system, I have used a series of checkp
 
 ### Current Performance
 
-![image](./docs/air_car_drive.gif=500x)
+<img src="./docs/air_car_drive.gif" width="500">
 
 ## Possible extensions in the future
 
