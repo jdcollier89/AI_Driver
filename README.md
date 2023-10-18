@@ -42,7 +42,11 @@ As the agent requires some sort of reward system, I have used a series of checkp
 
 ### Computer vision vectors
 
+![image](./docs/beam_sensor.gif)
+
 ### Current Performance
+
+![image](./docs/air_car_drive.gif=500x)
 
 ## Possible extensions in the future
 

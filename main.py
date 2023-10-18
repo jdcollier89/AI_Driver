@@ -24,11 +24,12 @@ def manual():
     run = True
     while run:
         clock.tick(FPS)
-
+                
+        game.draw()
         run = game.manual_loop()
         _ = game.game_state()
 
-        game.draw()
+        #game.draw()
         pygame.display.update()
 
     pygame.quit()
