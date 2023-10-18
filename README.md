@@ -48,6 +48,8 @@ As the agent requires some sort of reward system, I have used a series of checkp
 
 <img src="./docs/air_car_drive.gif" width="500">
 
+![image](./docs/air_car_drive.gif)
+
 ## Possible extensions in the future
 
 - Normalize input vector
