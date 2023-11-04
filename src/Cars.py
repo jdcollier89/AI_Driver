@@ -11,6 +11,7 @@ class AbstractCar:
         self.acceleration = 0.2
         self.driftFriction = 0.75 # Amount to reduce drift by each tick
         self.driftMomentum = 0
+        self.prepare_rot_img()
         self.reset()
 
     def reset(self):
@@ -20,26 +21,50 @@ class AbstractCar:
         self.vel = 0
         self.driftMomentum = 0
 
+    def prepare_rot_img(self):
+        "Precalculate all the possible rotations of the image"
+        angles = []
+        img = []
+        top_left = [] # offset to add to x and y
+        mask = []
+
+        for i in range(-175, 185, self.rotation_vel):
+            angles.append(i)
+            rot_img, (rot_x, rot_y) = rotate_center(
+                    self.img, (0, 0), i)
+            img.append(rot_img)
+            mask.append(pygame.mask.from_surface(rot_img))
+            top_left.append((rot_x, rot_y))
+
+        self.angles = angles
+        self.rot_imgs = img
+        self.rot_top_left = top_left
+        self.mask = mask
+
     def rotate(self, left=False, right=False):
-        if abs(self.vel) > 5:
-            multiplier = abs(self.vel)/5
-        else:
-            multiplier = 1
+        multiplier = 1
 
         if left:
             self.angle += self.rotation_vel * multiplier
         elif right:
             self.angle -= self.rotation_vel * multiplier
 
-        # round self.angle to one decimal place
-        # store all the rotated images ahead of time
-        
+        if self.angle > 180:
+            self.angle += -360
+        if self.angle < -175:
+            self.angle += 360
+
     def update_car_img(self):
         """
         Calculate the new image/position of car based on current rotation
         """
-        self.rot_img, (self.rot_x, self.rot_y) = rotate_center(
-                    self.img, (self.x, self.y), self.angle)
+        index = int((self.angle + 175) / 5)
+        self.rot_img = self.rot_imgs[index]
+        (offset_x, offset_y) = self.rot_top_left[index]
+        self.rot_x = self.x + offset_x
+        self.rot_y = self.y + offset_y
+        #self.rot_img, (self.rot_x, self.rot_y) = rotate_center(
+        #            self.img, (self.x, self.y), self.angle)
 
     def draw(self, win):
         """
@@ -102,7 +127,9 @@ class AbstractCar:
         Detect if collision has occured between provided mask and the car object.
         """
         # x, y parameters are pos of input mask
-        car_mask = pygame.mask.from_surface(self.rot_img)
+        index = int((self.angle + 175) / 5)
+        car_mask = self.mask[index]
+        #car_mask = pygame.mask.from_surface(self.rot_img)
         offset = (int(self.rot_x-x), int(self.rot_y-y))
         poi = mask.overlap(car_mask, offset)
         car_mask = None # Deallocate for memory

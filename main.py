@@ -47,7 +47,7 @@ def train():
     current_ep = 0
     n_games = 10000
     max_steps = 3600
-    current_ep = ddqn_agent.load_model()
+    #current_ep = ddqn_agent.load_model()
 
     while current_ep <= n_games:
         score = 0
